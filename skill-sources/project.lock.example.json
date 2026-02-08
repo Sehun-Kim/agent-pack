@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "name": "web-design-guidelines",
+      "sourceId": "skills-sh",
+      "ref": "vercel-labs/agent-skills@<40-hex-commit>",
+      "sha256": "<required>"
+    }
+  ]
+}

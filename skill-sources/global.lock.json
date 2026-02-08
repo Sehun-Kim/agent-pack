@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "name": "find-skills",
+      "sourceId": "skills-sh",
+      "ref": "vercel-labs/skills@556555c2a7cf3ff5312db9b456e08749d6e5dc08",
+      "sha256": "c1720ff6ac18832a05d91cd913eee8781310e9f376ce77b8d5fc25a32e530a89"
+    }
+  ]
+}

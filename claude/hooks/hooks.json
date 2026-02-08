@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"(npm|pnpm|yarn|bun|pytest|python -m pytest|uv run|poetry run|pipx run|cargo|make|docker|gradle|\\./gradlew|mvn|\\./mvnw)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"if(!process.env.TMUX){console.error('[agent-pack hook] Tip: run long commands in tmux for persistence/logs');console.error('[agent-pack hook] e.g. tmux new -s dev  |  tmux attach -t dev')}\""
+          }
+        ],
+        "description": "Reminder: tmux for long-running commands"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"git push\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.error('[agent-pack hook] Reminder before push: review git status + diff + tests');console.error('[agent-pack hook] Suggested: git status && git diff && (run tests)')\""
+          }
+        ],
+        "description": "Reminder: review before git push"
+      },
+      {
+        "matcher": "tool == \"Bash\" && tool_input.command matches \"git (switch -c|checkout -b)\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.error('[agent-pack hook] Tip: for parallel work, consider git worktree instead of switching branches.');console.error('[agent-pack hook] e.g. bash ~/agent-pack/scripts/git-worktree.sh new <branch> [base]  |  /worktree')\""
+          }
+        ],
+        "description": "Reminder: consider git worktree for parallel tasks"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "(tool == \"Edit\" || tool == \"Write\") && tool_input.file_path matches \"\\.(ts|tsx|js|jsx)$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const p=i.tool_input?.file_path;if(p&&fs.existsSync(p)){const s=fs.readFileSync(p,'utf8');const lines=s.split(/\\r?\\n/);const hits=[];for(let idx=0;idx<lines.length;idx++){if(/console\\.log\\s*\\(/.test(lines[idx]))hits.push(String(idx+1)+': '+lines[idx].trim())}if(hits.length){console.error('[agent-pack hook] WARNING: console.log found in '+p);hits.slice(0,5).forEach(h=>console.error('  '+h));console.error('[agent-pack hook] Please remove debug logs before commit/push.')}}}catch(e){}console.log(d)})\""
+          }
+        ],
+        "description": "Warn about console.log after JS/TS edits"
+      },
+      {
+        "matcher": "(tool == \"Edit\" || tool == \"Write\") && tool_input.file_path matches \"\\.(ts|tsx|js|jsx|py|java|kt|kts|gradle|yaml|yml|json|env)$\"",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');let d='';const patterns=[{name:'OpenAI key',re:/\\bsk-[A-Za-z0-9]{20,}\\b/g},{name:'GitHub token',re:/\\bghp_[A-Za-z0-9]{30,}\\b/g},{name:'Google API key',re:/\\bAIza[0-9A-Za-z_-]{35}\\b/g},{name:'AWS access key',re:/\\bAKIA[0-9A-Z]{16}\\b/g},{name:'Slack token',re:/\\bxox[baprs]-[A-Za-z0-9-]{10,}\\b/g},{name:'Private key block',re:/-----BEGIN (RSA|EC|OPENSSH) PRIVATE KEY-----/g},{name:'Bearer token',re:/\\bBearer\\s+[A-Za-z0-9-_\\.]{20,}\\b/g}];process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const p=i.tool_input?.file_path;if(p&&fs.existsSync(p)){const s=fs.readFileSync(p,'utf8');const hits=[];for(const pat of patterns){const m=s.match(pat.re);if(m&&m.length){hits.push(pat.name+': '+m.length+' match(es)')}}if(hits.length){console.error('[agent-pack hook] WARNING: possible secret detected in '+p);hits.slice(0,10).forEach(h=>console.error('  '+h));console.error('[agent-pack hook] If real secret: rotate it and remove from git history. If false positive: ignore.')}}}catch(e){}console.log(d)})\""
+          }
+        ],
+        "description": "Warn about likely secrets after edits"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"console.error('[agent-pack hook] End-of-turn reminder: run preflight before pushing (status/diff/tests/format/secrets).');console.error('[agent-pack hook] OpenCode: /preflight  |  Claude Code: /preflight')\""
+          }
+        ],
+        "description": "End-of-turn reminders"
+      }
+    ]
+  }
+}

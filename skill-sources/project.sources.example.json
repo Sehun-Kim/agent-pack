@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "policy": {
+    "mode": "allowlist",
+    "allowlistDomains": [
+      "github.com",
+      "skills.sh"
+    ]
+  },
+  "sources": [
+    {
+      "id": "skills-sh",
+      "type": "skills_sh",
+      "url": "https://skills.sh"
+    }
+  ]
+}

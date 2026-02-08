@@ -1,0 +1,56 @@
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Editors / IDEs
+# =========================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.bak.*
+*.tmp
+
+# =========================
+# Claude / OpenCode runtime
+# =========================
+.claude.json
+.claude/
+.opencode/
+
+# =========================
+# Generated files (runtime only)
+# =========================
+AGENTS.md
+token-usage-output.txt
+
+# Agent scratchpad (local notes)
+.sisyphus/
+
+# Project-local session context (runtime only)
+.agent/session/
+
+# =========================
+# Secrets / local configs
+# =========================
+.env
+.env.*
+*.secret
+*.key
+*.token
+
+# =========================
+# Logs / caches
+# =========================
+*.log
+.cache/
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
