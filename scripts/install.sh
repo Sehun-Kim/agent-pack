@@ -16,8 +16,23 @@ backup_then_link () {
   if [[ -e "$dst" || -L "$dst" ]]; then
     mv "$dst" "${dst}.bak.${TS}"
   fi
-  ln -s "$src" "$dst"
-  echo "linked: $dst -> $src"
+
+  # Prefer symlinks (source-of-truth), but fallback to copying when symlinks
+  # aren't supported (common on some Windows/WSL setups, network mounts, etc.).
+  if ln -s "$src" "$dst" 2>/dev/null; then
+    echo "linked: $dst -> $src"
+    return 0
+  fi
+
+  echo "warn: failed to symlink; copying instead: $dst <- $src" >&2
+
+  if [[ -d "$src" ]]; then
+    # Portable fallback: avoid GNU-only flags.
+    cp -R "$src" "$dst"
+  else
+    cp "$src" "$dst"
+  fi
+  echo "copied: $dst <- $src"
 }
 
 sha256_file () {
